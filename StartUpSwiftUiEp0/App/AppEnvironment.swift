@@ -5,9 +5,14 @@ struct AppEnvironment {
 
     static let demo = AppEnvironment(authRepository: DemoAuthRepository())
 
-    static let live = AppEnvironment(
-        authRepository: RemoteAuthRepository(
-            apiClient: APIClient(baseURL: URL(string: "https://api.yourdomain.com/")!)
+    static func live(connectivityMonitor: ConnectivityMonitor) -> AppEnvironment {
+        AppEnvironment(
+            authRepository: RemoteAuthRepository(
+                apiClient: APIClient(
+                    baseURL: URL(string: "https://api.yourdomain.com/")!,
+                    connectivityMonitor: connectivityMonitor
+                )
+            )
         )
-    )
+    }
 }

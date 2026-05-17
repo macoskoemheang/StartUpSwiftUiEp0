@@ -2,7 +2,7 @@ import SwiftUI
 
 struct LoginView: View {
     @ObservedObject var viewModel: AuthFlowViewModel
-    @State private var email = "demo@swiftui.dev"
+    @State private var email = "koemheang.dev"
     @State private var password = "Password123"
 
     var body: some View {
@@ -61,4 +61,11 @@ private extension LoginView {
         }
         .font(.footnote)
     }
+}
+#Preview {
+    LoginView(
+        viewModel: AuthFlowViewModel(
+            repository: DemoAuthRepository()
+        )
+    )
 }

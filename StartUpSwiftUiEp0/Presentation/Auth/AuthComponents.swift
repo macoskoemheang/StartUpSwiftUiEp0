@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AuthBackground: View {
+    @State private var isAnimating = false
+
     var body: some View {
         ZStack {
             AppTheme.background
@@ -10,13 +12,38 @@ struct AuthBackground: View {
                 .fill(Color.white.opacity(0.12))
                 .frame(width: 260)
                 .blur(radius: 4)
-                .offset(x: 120, y: -260)
+                .offset(
+                    x: isAnimating ? 145 : 105,
+                    y: isAnimating ? -230 : -275
+                )
+                .scaleEffect(isAnimating ? 1.12 : 0.94)
 
             Circle()
                 .fill(AppTheme.accent.opacity(0.24))
                 .frame(width: 220)
                 .blur(radius: 10)
-                .offset(x: -130, y: 240)
+                .offset(
+                    x: isAnimating ? -105 : -145,
+                    y: isAnimating ? 215 : 255
+                )
+                .scaleEffect(isAnimating ? 0.9 : 1.1)
+
+            Circle()
+                .fill(Color.purple.opacity(0.18))
+                .frame(width: 170)
+                .blur(radius: 18)
+                .offset(
+                    x: isAnimating ? -90 : -40,
+                    y: isAnimating ? -150 : -110
+                )
+        }
+        .onAppear {
+            withAnimation(
+                .easeInOut(duration: 5)
+                .repeatForever(autoreverses: true)
+            ) {
+                isAnimating = true
+            }
         }
     }
 }
@@ -25,9 +52,7 @@ struct AuthCard<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(spacing: 20) {
-            content
-        }
+        VStack(spacing: 20) {content}
         .padding(24)
         .background(
             RoundedRectangle(cornerRadius: 28, style: .continuous)
@@ -100,4 +125,7 @@ struct PrimaryAuthButton: View {
         }
         .disabled(isLoading)
     }
+}
+#Preview {
+    AuthBackground()
 }

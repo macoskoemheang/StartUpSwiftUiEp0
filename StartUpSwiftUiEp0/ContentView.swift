@@ -2,6 +2,10 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel: AuthFlowViewModel
+    @EnvironmentObject private var connectivityMonitor: ConnectivityMonitor
+    @State private var showConnectivitySnackbar = false
+    @State private var snackbarDismissTask: Task<Void, Never>?
+    @State private var hasResolvedInitialConnectivity = false
 
     init(repository: AuthRepository = AppEnvironment.demo.authRepository) {
         _viewModel = StateObject(wrappedValue: AuthFlowViewModel(repository: repository))
@@ -22,6 +26,20 @@ struct ContentView: View {
                 }
             }
         }
+        .overlay(alignment: .top) {
+            if showConnectivitySnackbar {
+                ConnectivitySnackbar(
+                    state: connectivityMonitor.state,
+                    waitingRequestCount: connectivityMonitor.waitingRequestCount
+                )
+                    .padding(.top, 14)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .onChange(of: connectivityMonitor.state) { _, newState in
+            handleConnectivityChange(newState)
+        }
+        .animation(.spring(duration: 0.35), value: showConnectivitySnackbar)
         .animation(.spring(duration: 0.35), value: viewModel.screen)
         .animation(.spring(duration: 0.35), value: viewModel.session)
         .alert("Notice", isPresented: Binding(
@@ -41,8 +59,32 @@ struct ContentView: View {
             Text(viewModel.resetConfirmationMessage ?? "")
         }
     }
+
+    private func handleConnectivityChange(_ state: ConnectivityMonitor.State) {
+        guard state != .checking else { return }
+
+        if !hasResolvedInitialConnectivity {
+            hasResolvedInitialConnectivity = true
+
+            if state == .connected {
+                return
+            }
+        }
+
+        snackbarDismissTask?.cancel()
+        showConnectivitySnackbar = true
+
+        if state == .connected {
+            snackbarDismissTask = Task {
+                try? await Task.sleep(for: .seconds(2))
+                guard !Task.isCancelled else { return }
+                showConnectivitySnackbar = false
+            }
+        }
+    }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(ConnectivityMonitor())
 }

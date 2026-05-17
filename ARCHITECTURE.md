@@ -19,6 +19,12 @@ View → ViewModel → UseCase → AuthRepository → APIClient → Backend
 
 The UI never talks to `URLSession` directly. The domain layer does not know about SwiftUI. The data layer can be swapped without rewriting screens.
 
+## Offline request behavior
+
+`ConnectivityMonitor` lives globally in `Core/Connectivity`. When a real API request starts while the device is offline, `APIClient` pauses before sending it. Once connectivity returns, all waiting requests resume automatically. The snackbar shows how many requests are waiting.
+
+This starter intentionally does not auto-retry a request that was already sent before the connection dropped, because repeating `POST` requests can create duplicate server actions unless your backend supports idempotency keys.
+
 ## Demo vs real API
 
 The app starts with `AppEnvironment.demo`, so the screens work immediately:

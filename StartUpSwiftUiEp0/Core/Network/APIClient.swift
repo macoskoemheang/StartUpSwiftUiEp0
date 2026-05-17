@@ -5,6 +5,7 @@ struct EmptyResponse: Decodable {}
 struct APIClient {
     let baseURL: URL
     var session: URLSession = .shared
+    var connectivityMonitor: ConnectivityMonitor?
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
@@ -24,6 +25,8 @@ struct APIClient {
         }
 
         do {
+            await connectivityMonitor?.waitUntilConnected()
+
             let (data, response) = try await session.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw APIError.invalidResponse
