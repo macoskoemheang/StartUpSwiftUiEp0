@@ -26,6 +26,7 @@ struct ContentView: View {
                 }
             }
         }
+        .dismissKeyboardOnTap()
         .overlay(alignment: .top) {
             if showConnectivitySnackbar {
                 ConnectivitySnackbar(
